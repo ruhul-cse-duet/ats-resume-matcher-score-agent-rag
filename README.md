@@ -25,7 +25,7 @@
 ### 1. Clone Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/ruhul-cse-duet/ats-resume-matcher-score-agent-rag.git
 cd "ATS Resume Matcher RAG Langchain Agent"
 ```
 
