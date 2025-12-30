@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+requests
+python-multipart
+pypdf
+python-docx
+sentence-transformers
+faiss-cpu
+sqlalchemy
+alembic
+psycopg2-binary
+passlib[bcrypt]
+PyJWT
+python-dotenv
+pytest
+httpx

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATS Resume Matcher - AI-Powered Resume Analysis</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loader"></div>
+        <p class="loading-text">Processing...</p>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="logo">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    ATS Resume Matcher RAG based AI Agent
+                </h1>
+                <div class="auth-status" id="authStatusHeader">
+                    <span id="userEmail"></span>
+                    <button id="logoutBtn" class="btn-icon" style="display:none;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            
+            <!-- Authentication Section -->
+            <section id="authSection" class="auth-section card">
+                <div class="card-header">
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to analyze your resume or create a new account</p>
+                </div>
+                <div class="card-body">
+                    <div class="auth-tabs">
+                        <button class="tab-btn active" data-tab="login">Login</button>
+                        <button class="tab-btn" data-tab="signup">Sign Up</button>
+                    </div>
+                    
+                    <div class="tab-content active" id="loginTab">
+                        <form id="loginForm" class="auth-form">
+                            <div class="form-group">
+                                <label for="loginEmail">Email Address</label>
+                                <input type="email" id="loginEmail" placeholder="you@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="loginPassword">Password</label>
+                                <input type="password" id="loginPassword" placeholder="••••••••" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-full">
+                                <span>Sign In</span>
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div class="tab-content" id="signupTab">
+                        <form id="signupForm" class="auth-form">
+                            <div class="form-group">
+                                <label for="signupEmail">Email Address</label>
+                                <input type="email" id="signupEmail" placeholder="you@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="signupPassword">Password</label>
+                                <input type="password" id="signupPassword" placeholder="Minimum 6 characters" required minlength="6">
+                                <small class="form-hint">Password must be at least 6 characters long</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-full">
+                                <span>Create Account</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main App Section -->
+            <section id="appSection" class="app-section" style="display:none;">
+                
+                <!-- Analyze Resume Card -->
+                <div class="card feature-card">
+                    <div class="card-header">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2>Analyze Resume</h2>
+                            <p>Get AI-powered ATS compatibility score and insights</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form id="analyzeForm">
+                            <div class="form-group">
+                                <label for="jd">Job Description</label>
+                                <textarea id="jd" rows="6" placeholder="Paste the job description here..." required></textarea>
+                                <small class="form-hint">Include key requirements, skills, and responsibilities</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="resume">Upload Resume</label>
+                                <div class="file-upload-wrapper">
+                                    <input type="file" id="resume" accept=".pdf,.docx,.txt" required>
+                                    <div class="file-upload-display">
+                                        <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                        </svg>
+                                        <span class="file-name">Choose file or drag here</span>
+                                        <span class="file-types">PDF, DOCX, or TXT (Max 10MB)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-full">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                                <span>Analyze Resume</span>
+                            </button>
+                        </form>
+                        
+                        <!-- Results -->
+                        <div id="resultSection" class="result-section" style="display:none;">
+                            <div class="result-header">
+                                <h3>Analysis Results</h3>
+                                <button class="btn-icon" id="clearResults">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <div class="score-card">
+                                <div class="score-circle">
+                                    <svg class="score-ring" viewBox="0 0 120 120">
+                                        <circle class="score-ring-bg" cx="60" cy="60" r="54" fill="none" stroke="#e0e7ff" stroke-width="8"/>
+                                        <circle id="scoreRingFill" class="score-ring-fill" cx="60" cy="60" r="54" fill="none" stroke="#6366f1" stroke-width="8" stroke-linecap="round"/>
+                                    </svg>
+                                    <div class="score-value">
+                                        <span id="scoreNumber">0</span>
+                                        <span class="score-percent">%</span>
+                                    </div>
+                                </div>
+                                <div class="score-label">ATS Match Score</div>
+                            </div>
+                            
+                            <div class="keywords-section">
+                                <h4>Matched Keywords</h4>
+                                <div id="keywordsList" class="keywords-list"></div>
+                            </div>
+                            
+                            <div class="analysis-section">
+                                <h4>Detailed Analysis</h4>
+                                <div id="analysisText" class="analysis-text"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rewrite Resume Card -->
+                <div class="card feature-card">
+                    <div class="card-header">
+                        <div class="feature-icon feature-icon-secondary">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2>Rewrite Resume</h2>
+                            <p>Optimize your resume content for ATS systems</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form id="rewriteForm">
+                            <div class="form-group">
+                                <label for="rawresume">Resume Text</label>
+                                <textarea id="rawresume" rows="8" placeholder="Paste your resume content here..." required></textarea>
+                                <small class="form-hint">Include your work experience, skills, and education</small>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-secondary btn-full">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                <span>Rewrite & Optimize</span>
+                            </button>
+                        </form>
+                        
+                        <!-- Rewrite Results -->
+                        <div id="rewriteResultSection" class="result-section" style="display:none;">
+                            <div class="result-header">
+                                <h3>Optimized Resume</h3>
+                                <div class="result-actions">
+                                    <button class="btn-icon" id="copyRewrite" title="Copy to clipboard">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="btn-icon" id="clearRewriteResults">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="rewriteResult" class="rewrite-result"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 ATS Resume Matcher. Powered by AI.</p>
+        </div>
+    </footer>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
